@@ -1,5 +1,6 @@
 package com.skilldistillery.todoapp.controllers;
 
+import java.security.Principal;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,16 +28,17 @@ public class TodoController {
 	@Autowired
 	private TodoService todoService;
 
-	private String username = "shaun"; // TEMPORARY
+//	private String username = "shaun"; // TEMPORARY
 	
 	@GetMapping(path={"todos","todos/"})
-	public Set<Todo> index(HttpServletRequest req, HttpServletResponse res) {
-		return todoService.index(username);
+	public Set<Todo> index(Principal principal, HttpServletRequest req, HttpServletResponse res) {
+//		return todoService.index(username);
+		return todoService.index(principal.getName());
 	}
 
 	@GetMapping("todos/{tid}")
-	public Todo show(HttpServletRequest req, HttpServletResponse res, @PathVariable("tid") int tid) {
-		Todo todo = todoService.show(username, tid);
+	public Todo show(Principal principal, HttpServletRequest req, HttpServletResponse res, @PathVariable("tid") int tid) {
+		Todo todo = todoService.show(principal.getName(), tid);
 		if (todo == null) {
 			res.setStatus(404);
 		}
@@ -44,9 +46,9 @@ public class TodoController {
 	}
 
 	@PostMapping("todos")
-	public Todo create(HttpServletRequest req, HttpServletResponse res, @RequestBody Todo todo) {
+	public Todo create(Principal principal, HttpServletRequest req, HttpServletResponse res, @RequestBody Todo todo) {
 		try {
-			todo = todoService.create(username, todo);
+			todo = todoService.create(principal.getName(), todo);
 			if (todo != null) {
 				res.setStatus(201);
 				res.setHeader("Location", req.getRequestURL().append("/").append(todo.getId()).toString() );
@@ -63,11 +65,11 @@ public class TodoController {
 	}
 
 	@PutMapping("todos/{tid}")
-	public Todo update(HttpServletRequest req, HttpServletResponse res,
+	public Todo update(Principal principal, HttpServletRequest req, HttpServletResponse res,
 			@PathVariable("tid") int tid, @RequestBody Todo todo) {	
 		Todo updated;
 		try {
-			updated = todoService.update(username, tid, todo);
+			updated = todoService.update(principal.getName(), tid, todo);
 			if (updated == null) {
 				res.setStatus(404);
 			}
@@ -80,9 +82,9 @@ public class TodoController {
 	}
 
 	@DeleteMapping("todos/{tid}")
-	public void destroy(HttpServletRequest req, HttpServletResponse res, @PathVariable("tid") int tid) {
+	public void destroy(Principal principal, HttpServletRequest req, HttpServletResponse res, @PathVariable("tid") int tid) {
 		try {
-			if (todoService.destroy(username, tid)) {
+			if (todoService.destroy(principal.getName(), tid)) {
 				res.setStatus(204);
 			}
 			else {
